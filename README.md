@@ -1,8 +1,12 @@
 # Prefetch for Silo
 
-Download upcoming TV episodes through Sonarr when someone starts watching in Silo. This native Silo plugin replaces the separate Prefetcharr polling service for this use case.
+Automatically download upcoming TV episodes through Sonarr as you watch in Silo. Prefetch waits until an episode reaches 10% playback progress by default, then asks Sonarr to fetch missing episodes ahead of it.
+
+You can configure how many episodes to fetch, when prefetching starts, which users and series qualify, and an optional second Sonarr instance for 4K content.
 
 ## Install
+
+You need a Silo server with plugin support and a working Sonarr setup, including indexers and a download client. Add the series you want to prefetch to Sonarr first.
 
 1. Download the appropriate ZIP from [GitHub Releases](https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases), or build the packages below.
 2. In Silo, open **Administration → Plugins → Install from a file**. Upload the archive for the machine running **Silo**, not your browser:
@@ -13,7 +17,7 @@ Download upcoming TV episodes through Sonarr when someone starts watching in Sil
 4. Save, then open **Prefetch status → Test connections**. All configured services must show **Connected**.
 5. Enable prefetch and save. Play an episode from an existing Sonarr series. Review **Prefetch status** and Sonarr **Activity**.
 
-Each ZIP contains `plugin` and `manifest.json` at its root, with the SHA-256 of that platform's binary. You can also upload the unpacked `plugin` binary; it reports its own manifest and checksum. Manual installation does not require community catalog approval. This plugin is not currently catalog-approved.
+Upload the ZIP directly; you do not need to extract it. Archive checksums are included with each release in `SHA256SUMS`. This plugin is available through manual installation and is not currently listed in the approved community catalog.
 
 ## Configure
 
@@ -35,19 +39,19 @@ URLs must be absolute HTTP(S) URLs without embedded credentials, query strings, 
 
 ## Behavior
 
-The plugin subscribes to `playback_sessions_changed` and `sessions.replaced` through `event_consumer.v1`. Each notification triggers a paginated read of active sessions from Silo's native API. It has no polling timer. Processing follows Silo's session reconciliation rather than happening synchronously inside the Play request.
+Prefetch responds to Silo's playback-session updates. Allow time for Silo to report playback progress before checking the result.
 
-Prefetch always asks `RuntimeHost.GetHostInfo` for its own Silo server's `internal_base_url` when processing events and testing connections. There is no URL setting. It still needs the administrator API key to read sessions. Connection checks report an error if the host connection is unavailable or the Silo build cannot report its internal API URL.
+The plugin discovers its own Silo server automatically, so there is no Silo URL to configure. It uses Silo's v2 API and needs an administrator API key to read active sessions.
 
-When **Minimum playback progress (%)** is above zero, session updates are ignored until `position_seconds / file_duration × 100` reaches the configured percentage. No Sonarr requests or monitoring changes happen below that threshold, and stopping before reaching it causes no prefetch. The next qualifying session update triggers prefetch. An unknown or zero duration waits for usable metadata. This measures playback position, not accumulated viewing time: resuming or seeking past the threshold qualifies. Omitted settings default to 10%; explicitly saved values, including 0, are preserved on upgrade.
+**Minimum playback progress (%)** controls when prefetching starts. The default is 10%; set it to 0 for immediate prefetch. Stopping before the threshold causes no prefetch. Progress is based on the current position in the episode, so resuming or seeking past the threshold qualifies. If Silo does not know the episode's duration, Prefetch waits until it can determine progress.
 
 For each eligible session and each Sonarr instance:
 
-1. Find an existing series by title or alternate title. Ambiguous matches are skipped. The Silo sessions endpoint does not supply TVDB IDs, so titles must match.
+1. Find an existing series by title or alternate title. Ambiguous matches are skipped, so Silo and Sonarr must use matching titles.
 2. Apply user/profile and Sonarr tag filters.
 3. Select the next N known episodes in season/episode order, continuing across seasons and skipping specials.
 4. Enable series monitoring if needed, then monitor missing episodes individually. Preserve the rest of the series and existing season monitoring flags.
-5. Submit `EpisodeSearch` for aired missing episodes, excluding queued downloads and episodes searched in the last 15 minutes.
+5. Search for aired missing episodes, excluding queued downloads and episodes searched in the last 15 minutes.
 
 With **episodes ahead = 3**, playing S01E07 checks S01E08, S02E01, and S02E02 when those are the next known episodes. If S01E08 is present, only the other two need monitoring. Unaired episodes are monitored for Sonarr's RSS handling but are not searched early; episodes with no known air date are also not searched.
 
@@ -59,14 +63,12 @@ Only the discovered local Silo API and configured Sonarr endpoints receive reque
 
 ## Verify on your server
 
-1. Leave Prefetch disabled and test connections.
-2. Pick an allowed series with an aired missing episode within the next N positions. Note its monitoring flags.
-3. Enable Prefetch and play the preceding episode using an allowed profile. If a progress threshold is set, wait until that percentage is reached. Allow Silo's session reconciliation to publish its event.
-4. Confirm that Prefetch status reports the missing episode IDs. In Sonarr, confirm the individual monitoring flags and `EpisodeSearch` command in logs/command activity. A matching release should appear in **Activity → Queue**.
-5. Reconcile/replay the same session and confirm another search is suppressed. With a nonzero progress threshold, starting then stopping below it should cause no monitoring/search. Check excluded users and series tags; neither should trigger monitoring/search.
-6. After verification, stop the old Prefetcharr service so both services do not request the same episodes.
+1. Save your settings and use **Prefetch status → Test connections**.
+2. Enable prefetch. Choose a series that exists in Sonarr and has an aired missing episode within your configured window.
+3. Play an episode in Silo using an allowed profile and reach the configured progress threshold.
+4. Open **Prefetch status** to see the result. In Sonarr, the selected missing episodes should be monitored, and matching releases should appear in **Activity → Queue**.
 
-Connection checks only read services; they do not request downloads. Automated tests use HTTP fixtures plus a real compiled plugin process. See [TESTING.md](TESTING.md) for validation evidence and limits. Record live verification separately.
+Connection checks only read services; they do not request downloads. See [TESTING.md](TESTING.md) for automated and live verification details.
 
 If status stays **Waiting for playback**, confirm your Silo build supports plugin event consumers and publishes these session events. A 401/403 means the API key/account permissions need checking; use an administrator-owned key with empty scopes. A discovery failure means the host broker or internal URL information is unavailable. A Silo 404 can indicate a build predating the native v2 endpoint. **Series not found** requires aligning Silo's title with a Sonarr title/alternate title.
 
@@ -93,4 +95,4 @@ CI runs race tests, vet, manifest introspection, and all platform builds, then u
 - [Scrob example](https://github.com/Joloxx9/silo-plugin-watchprovider-scrob): uses per-profile watch-provider calls; Prefetch uses global events and the admin sessions API.
 - [Community catalog](https://github.com/Silo-Community/silo-plugins): approval and distribution.
 
-MIT. This is a new Go implementation informed by the local [Prefetcharr](https://github.com/p-hueber/prefetcharr) project (Paul Hüber, MIT OR Apache-2.0). No Rust source or Scrob implementation is included.
+Licensed under the [MIT License](LICENSE).

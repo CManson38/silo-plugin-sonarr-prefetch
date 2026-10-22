@@ -52,4 +52,4 @@ After the operator installed and configured the Linux amd64 package, real playba
 
 The installed plugin received a real session event at 2026-10-22T01:00:11Z and automatically discovered its own Silo API. With the operator's two-episode window, it monitored and searched S02E07–E08 (IDs 97061–97062). Sonarr completed `EpisodeSearch` command 132840933 at 01:00:18Z. E07 was downloading, E08 was queued, both had healthy tracking status, and E09 remained unmonitored. This verifies the real Silo event → installed plugin → monitoring → search → download queue path on Linux amd64.
 
-Linux arm64 and macOS arm64 remain cross-compiled artifacts whose runtime execution has not been tested. Completed download imports were not checked. The old Prefetcharr service was left unchanged.
+Linux arm64 and macOS arm64 remain cross-compiled artifacts whose runtime execution has not been tested. Completed download imports were not checked.
