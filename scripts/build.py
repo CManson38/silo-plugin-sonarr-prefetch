@@ -26,17 +26,22 @@ def main():
     if (ROOT / ".tools").is_dir():
         env.update(GOPATH=str(ROOT / ".tools/gopath"), GOCACHE=str(ROOT / ".tools/gocache"))
     sums = []
+    binary_sums = []
     for target_os, arch in PLATFORMS:
         name = f"prefetch-{args.version}-{target_os}-{arch}"
         target = output / name
         target.mkdir(exist_ok=True)
         binary = target / "plugin"
-        env.update(GOOS=target_os, GOARCH=arch)
+        target_env = dict(env, GOOS=target_os, GOARCH=arch)
         subprocess.run([args.go, "build", "-trimpath", "-ldflags",
                         f"-s -w -X main.version={args.version}", "-o", str(binary), "."],
-                       cwd=ROOT, env=env, check=True)
+                       cwd=ROOT, env=target_env, check=True)
         manifest = dict(source_manifest, checksum=hashlib.sha256(binary.read_bytes()).hexdigest())
         (target / "manifest.json").write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
+        raw_binary = output / f"plugin-{target_os}-{arch}"
+        shutil.copyfile(binary, raw_binary)
+        raw_binary.chmod(0o755)
+        binary_sums.append(f"{manifest['checksum']}  {raw_binary.name}")
         archive = output / f"{name}.zip"
         with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
             for file in [binary, target / "manifest.json"]:
@@ -48,6 +53,8 @@ def main():
         sums.append(f"{hashlib.sha256(archive.read_bytes()).hexdigest()}  {archive.name}")
         print(archive)
     (output / "SHA256SUMS").write_text("\n".join(sums)+"\n", encoding="utf-8")
+    (output / "checksums.txt").write_text("\n".join(binary_sums)+"\n", encoding="utf-8")
+    subprocess.run([args.go, "run", "./cmd/update-index", "-output", "dist/index.json"], cwd=ROOT, env=env, check=True)
 
 
 if __name__ == "__main__":

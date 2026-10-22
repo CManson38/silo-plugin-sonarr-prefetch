@@ -1,0 +1,239 @@
+{
+  "plugins": [
+    {
+      "manifest": {
+        "plugin_id": "community.requests.prefetch",
+        "version": "0.2.0",
+        "silo_api_version": "v1",
+        "supported_platforms": [
+          {
+            "os": "linux",
+            "arch": "amd64"
+          },
+          {
+            "os": "linux",
+            "arch": "arm64"
+          },
+          {
+            "os": "darwin",
+            "arch": "arm64"
+          }
+        ],
+        "capabilities": [
+          {
+            "type": "event_consumer.v1",
+            "id": "prefetch",
+            "display_name": "Episode Prefetch",
+            "description": "Prefetch upcoming TV episodes when Silo playback sessions change.",
+            "subscriptions": [
+              "playback_sessions_changed",
+              "sessions.replaced"
+            ]
+          },
+          {
+            "type": "http_routes.v1",
+            "id": "prefetch_status",
+            "display_name": "Prefetch status",
+            "description": "Administrator status and read-only connection checks."
+          }
+        ],
+        "global_config_schema": [
+          {
+            "key": "prefetch",
+            "title": "Prefetch settings",
+            "description": "Silo session access, two Sonarr instances, and prefetch filters.",
+            "json_schema": "{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\",\"default\":false},\"silo_api_key\":{\"type\":\"string\",\"minLength\":1},\"sonarr_url\":{\"type\":\"string\",\"minLength\":1},\"sonarr_api_key\":{\"type\":\"string\",\"minLength\":1},\"sonarr_4k_url\":{\"type\":\"string\"},\"sonarr_4k_api_key\":{\"type\":\"string\"},\"episodes_ahead\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":100,\"default\":2},\"min_watched_percent\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":100,\"default\":10},\"include_users\":{\"type\":\"string\",\"default\":\"\"},\"exclude_users\":{\"type\":\"string\",\"default\":\"\"},\"include_tags\":{\"type\":\"string\",\"default\":\"\"},\"exclude_tags\":{\"type\":\"string\",\"default\":\"\"}},\"required\":[\"silo_api_key\",\"sonarr_url\",\"sonarr_api_key\"],\"additionalProperties\":false}",
+            "required": true,
+            "admin_form": {
+              "fields": [
+                {
+                  "key": "enabled",
+                  "label": "Enable prefetch",
+                  "description": "Turn on after saving settings and testing connections.",
+                  "control": 5,
+                  "default_value": false
+                },
+                {
+                  "key": "silo_api_key",
+                  "label": "Silo admin API key",
+                  "description": "An administrator API key permitted to read active sessions.",
+                  "control": 3,
+                  "required": true,
+                  "secret": true
+                },
+                {
+                  "key": "sonarr_url",
+                  "label": "Sonarr URL",
+                  "description": "Standard Sonarr base URL, e.g. http://sonarr:8989. Include a reverse proxy base path if used.",
+                  "control": 1,
+                  "required": true
+                },
+                {
+                  "key": "sonarr_api_key",
+                  "label": "Sonarr API key",
+                  "description": "Sonarr Settings \u003e General \u003e Security \u003e API Key.",
+                  "control": 3,
+                  "required": true,
+                  "secret": true
+                },
+                {
+                  "key": "sonarr_4k_url",
+                  "label": "4K Sonarr URL (optional)",
+                  "description": "A second Sonarr instance. Both instances prefetch when they contain the series.",
+                  "control": 1
+                },
+                {
+                  "key": "sonarr_4k_api_key",
+                  "label": "4K Sonarr API key (optional)",
+                  "description": "Required when the second Sonarr URL is set.",
+                  "control": 3,
+                  "secret": true
+                },
+                {
+                  "key": "episodes_ahead",
+                  "label": "Episodes ahead",
+                  "description": "Next N episodes after the playing episode, including episodes already downloaded. Continues into the next season; skips specials.",
+                  "control": 4,
+                  "default_value": 2,
+                  "validation": {
+                    "has_min": true,
+                    "min": 1,
+                    "has_max": true,
+                    "max": 100
+                  }
+                },
+                {
+                  "key": "min_watched_percent",
+                  "label": "Minimum playback progress (%)",
+                  "description": "Wait until the current episode reaches this percentage before monitoring or searching upcoming episodes. Default 10 waits until 10% progress. 0 triggers immediately. Resuming or seeking past the threshold qualifies; unknown duration waits when this is above 0.",
+                  "control": 4,
+                  "default_value": 10,
+                  "validation": {
+                    "has_min": true,
+                    "has_max": true,
+                    "max": 100
+                  }
+                },
+                {
+                  "key": "include_users",
+                  "label": "Include users / profiles",
+                  "description": "Optional account IDs, usernames, profile IDs, or profile names. Commas or newlines. Empty allows all. Names match without case sensitivity.",
+                  "control": 2,
+                  "multiline": true,
+                  "default_value": "",
+                  "rows": 3
+                },
+                {
+                  "key": "exclude_users",
+                  "label": "Exclude users / profiles",
+                  "description": "Account or profile IDs/names to skip. Exclusions override inclusions.",
+                  "control": 2,
+                  "multiline": true,
+                  "default_value": "",
+                  "rows": 3
+                },
+                {
+                  "key": "include_tags",
+                  "label": "Include Sonarr tags",
+                  "description": "Optional tag labels; a series must have at least one. Evaluated separately in each Sonarr. Empty allows all series.",
+                  "control": 2,
+                  "multiline": true,
+                  "default_value": "",
+                  "rows": 3
+                },
+                {
+                  "key": "exclude_tags",
+                  "label": "Exclude Sonarr tags",
+                  "description": "Series with any matching tag label are skipped. Exclusions override inclusions.",
+                  "control": 2,
+                  "multiline": true,
+                  "default_value": "",
+                  "rows": 3
+                }
+              ],
+              "sections": [
+                {
+                  "key": "silo",
+                  "title": "Silo",
+                  "field_keys": [
+                    "enabled",
+                    "silo_api_key"
+                  ]
+                },
+                {
+                  "key": "sonarr",
+                  "title": "Sonarr",
+                  "field_keys": [
+                    "sonarr_url",
+                    "sonarr_api_key",
+                    "sonarr_4k_url",
+                    "sonarr_4k_api_key"
+                  ]
+                },
+                {
+                  "key": "rules",
+                  "title": "Prefetch rules",
+                  "field_keys": [
+                    "episodes_ahead",
+                    "min_watched_percent",
+                    "include_users",
+                    "exclude_users",
+                    "include_tags",
+                    "exclude_tags"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "http_routes": [
+          {
+            "id": "status",
+            "method": "GET",
+            "path": "/status",
+            "access": "admin",
+            "navigable": true,
+            "navigation_label": "Prefetch status",
+            "navigation_kind": "admin"
+          },
+          {
+            "id": "check",
+            "method": "GET",
+            "path": "/check",
+            "access": "admin"
+          }
+        ],
+        "category": "Requests",
+        "presentation": {
+          "display_name": "Prefetch",
+          "summary": "Download upcoming TV episodes through Sonarr when someone starts watching in Silo.",
+          "description_markdown": "Receives Silo session-change events, reads current episodes from the Silo admin API, and monitors missing episodes in the next configured window. Searches aired episodes through one or two Sonarr instances. Supports account/profile inclusion and exclusion, and Sonarr tag filters. Series must already exist in Sonarr. Discovers its own Silo server automatically and sends requests only to that server and your configured Sonarr endpoints; no telemetry.",
+          "setup_markdown": "1. Enter a Silo API key owned by an administrator with scopes left empty (unrestricted). Silo has no restricted scope for the required sessions endpoint; its URL is discovered automatically.\n2. Enter the standard Sonarr URL and API key; optionally add 4K Sonarr.\n3. Choose episodes ahead and user/tag filters. Save.\n4. Open Prefetch status and test connections.\n5. Enable prefetch, save, and play a TV episode. Review status and Sonarr Activity.",
+          "homepage_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch",
+          "source_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch",
+          "support_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/issues",
+          "changelog_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases",
+          "publisher_name": "CManson38",
+          "publisher_url": "https://github.com/CManson38",
+          "license_spdx": "MIT"
+        }
+      },
+      "repo_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch",
+      "checksums_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.0/checksums.txt",
+      "binaries": {
+        "darwin/arm64": {
+          "url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.0/plugin-darwin-arm64",
+          "checksum": "f4ea78c7e2eff69fee36e3e988a4c3d3aa22d4efe42a50e800da4aaa6f4fa423"
+        },
+        "linux/amd64": {
+          "url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.0/plugin-linux-amd64",
+          "checksum": "3d6d9478a5b24cc3c546ae48bf637d8bc424adf0dcc7d7e1e9e0e0b8dadf8422"
+        },
+        "linux/arm64": {
+          "url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.0/plugin-linux-arm64",
+          "checksum": "f0ab756a88652333b1261aa6586584da028ff0c35801bad5673814ba695cf9f7"
+        }
+      }
+    }
+  ]
+}

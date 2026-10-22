@@ -6,6 +6,8 @@ The automatic URL discovery update passed `go test -count=1 ./...`. The compiled
 
 ## Automated checks
 
+Catalog tests use Silo's standard JSON decoding into the SDK's manifest types, validate the published `index.json`, check release URLs and per-platform checksum formats, and reject missing or empty binary inputs. The catalog generator serializes protobuf enum values numerically for compatibility with Silo's catalog reader. The initial catalog's hashes were computed from the verified binaries inside the existing v0.2.0 release ZIPs.
+
 Version 0.2.0 adds a configurable playback-progress threshold, defaulting to 10%. The compiled plugin test omits the threshold setting, sends sessions at 9.9% progress, removes the session to simulate an early stop, restores it below threshold, then advances it to exactly 10%. No search occurs until that boundary; repeated progress then causes no duplicate search. Additional tests cover missing/zero duration, invalid positions, resumed playback, configuration bounds, defaulting to 10%, preserving an explicit 0%, and ensuring below-threshold sessions cause neither monitoring nor search. This threshold update has not been installed or live-tested on the operator's server.
 
 The initial `go test -cover ./...` passed using Go 1.27.3 on Windows amd64, with 90.1% statement coverage in `prefetch` before the discovery update. The executable entry point is exercised by a separately built process, so its in-process coverage reports 0%.

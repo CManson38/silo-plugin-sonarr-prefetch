@@ -8,6 +8,16 @@ You can configure how many episodes to fetch, when prefetching starts, which use
 
 You need a Silo server with plugin support and a working Sonarr setup, including indexers and a download client. Add the series you want to prefetch to Sonarr first.
 
+To install from a repository, open **Administration → Plugins → Repositories → Add repository** and use this URL:
+
+```text
+https://raw.githubusercontent.com/CManson38/silo-plugin-sonarr-prefetch/main/index.json
+```
+
+Name the repository **Sonarr Prefetch**, add it, then select **Prefetch** from the catalog and install. Configure the plugin using steps 3–5 below.
+
+You can also install a release ZIP manually:
+
 1. Download the appropriate ZIP from [GitHub Releases](https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases), or build the packages below.
 2. In Silo, open **Administration → Plugins → Install from a file**. Upload the archive for the machine running **Silo**, not your browser:
    - `prefetch-0.2.0-linux-amd64.zip`: typical Unraid / x86 Docker server.
@@ -17,7 +27,7 @@ You need a Silo server with plugin support and a working Sonarr setup, including
 4. Save, then open **Prefetch status → Test connections**. All configured services must show **Connected**.
 5. Enable prefetch and save. Play an episode from an existing Sonarr series. Review **Prefetch status** and Sonarr **Activity**.
 
-Upload the ZIP directly; you do not need to extract it. Archive checksums are included with each release in `SHA256SUMS`. This plugin is available through manual installation and is not currently listed in the approved community catalog.
+Upload the ZIP directly; you do not need to extract it. Archive checksums are included with each release in `SHA256SUMS`. The custom repository above and manual ZIP installation are available independently of the approved community catalog; this plugin is not currently listed there.
 
 ## Configure
 
@@ -86,7 +96,9 @@ python3 scripts/build.py
 
 On Windows use `go build -o plugin.exe .`, `.\plugin.exe manifest`, and `python scripts/build.py`. The repository-local compiler, if present, is `.tools/go/bin/go.exe`. Packaging builds static binaries (`CGO_ENABLED=0`) for all three platforms into `dist/`, with uploadable ZIPs and `SHA256SUMS`.
 
-CI runs race tests, vet, manifest introspection, and all platform builds, then uploads workflow artifacts. Pushing a version tag matching `manifest.json` (for example `v0.2.0`) publishes a GitHub release with all three platform ZIPs and `SHA256SUMS` after those checks pass.
+CI runs race tests, vet, manifest introspection, and all platform builds, then uploads workflow artifacts. Pushing a version tag matching `manifest.json` (for example `v0.2.0`) publishes a GitHub release after those checks pass. Releases include all three platform ZIPs, raw `plugin-OS-ARCH` binaries, archive checksums in `SHA256SUMS`, binary checksums in `checksums.txt`, and a generated `index.json`.
+
+The release workflow updates the repository's root `index.json` only after publishing its downloads. Catalog entries use per-platform binary hashes and numeric enum values compatible with Silo's catalog reader. The initial v0.2.0 catalog uses binaries extracted from its published ZIPs, so its hashes match the original release rather than a later rebuild.
 
 ## References and license
 
