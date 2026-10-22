@@ -1,0 +1,8 @@
+.research/
+.tools/
+dist/
+plugin
+plugin.exe
+go.work
+go.work.sum
+INSTALL.local.md
