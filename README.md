@@ -20,9 +20,9 @@ You can also install a release ZIP manually:
 
 1. Download the appropriate ZIP from [GitHub Releases](https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases), or build the packages below.
 2. In Silo, open **Administration → Plugins → Install from a file**. Upload the archive for the machine running **Silo**, not your browser:
-   - `prefetch-0.2.0-linux-amd64.zip`: typical Unraid / x86 Docker server.
-   - `prefetch-0.2.0-linux-arm64.zip`: ARM Linux server.
-   - `prefetch-0.2.0-darwin-arm64.zip`: Apple Silicon macOS server.
+   - `prefetch-0.2.1-linux-amd64.zip`: typical Unraid / x86 Docker server.
+   - `prefetch-0.2.1-linux-arm64.zip`: ARM Linux server.
+   - `prefetch-0.2.1-darwin-arm64.zip`: Apple Silicon macOS server.
 3. Open **Prefetch** and fill in its settings. Leave **Enable prefetch** off initially.
 4. Save, then open **Prefetch status → Test connections**. All configured services must show **Connected**.
 5. Enable prefetch and save. Play an episode from an existing Sonarr series. Review **Prefetch status** and Sonarr **Activity**.
@@ -92,13 +92,20 @@ go vet ./...
 go build -o plugin .
 ./plugin manifest
 python3 scripts/build.py
+python3 scripts/check_release.py
 ```
 
 On Windows use `go build -o plugin.exe .`, `.\plugin.exe manifest`, and `python scripts/build.py`. The repository-local compiler, if present, is `.tools/go/bin/go.exe`. Packaging builds static binaries (`CGO_ENABLED=0`) for all three platforms into `dist/`, with uploadable ZIPs and `SHA256SUMS`.
 
-CI runs race tests, vet, manifest introspection, and all platform builds, then uploads workflow artifacts. Pushing a version tag matching `manifest.json` (for example `v0.2.0`) publishes a GitHub release after those checks pass. Releases include all three platform ZIPs, raw `plugin-OS-ARCH` binaries, archive checksums in `SHA256SUMS`, binary checksums in `checksums.txt`, and a generated `index.json`.
+CI runs race tests, vet, formatting checks, manifest introspection, and all platform builds with workspace resolution disabled and no local dependency replacements. It verifies that binary hashes, executable architectures, per-platform manifests, ZIP contents, and catalog entries agree before uploading workflow artifacts. Pushing a version tag matching `manifest.json` (for example `v0.2.1`) publishes a GitHub release after those checks pass. Releases include all three platform ZIPs, raw `plugin-OS-ARCH` binaries, checksum-bearing `manifest-OS-ARCH.json` files, archive checksums in `SHA256SUMS`, binary checksums in `checksums.txt`, and a generated `index.json`.
 
 The release workflow updates the repository's root `index.json` only after publishing its downloads. Catalog entries use per-platform binary hashes and numeric enum values compatible with Silo's catalog reader. The initial v0.2.0 catalog uses binaries extracted from its published ZIPs, so its hashes match the original release rather than a later rebuild.
+
+For approved community releases, the workflow also sends `plugin_release_published` to `Silo-Community/silo-plugins`, using `github.repository` and the release tag. Maintainers configure the `SILO_PLUGINS_DISPATCH_TOKEN` Actions secret with permission to dispatch to that catalog repository. Without the secret, the notification is skipped and release publication still succeeds. A notification does not grant approval; see the [submission checklist and draft](docs/community-submission.md) for the remaining ownership and review steps.
+
+## Support and maintenance
+
+Maintained by [@CManson38](https://github.com/CManson38), also listed in [.github/CODEOWNERS](.github/CODEOWNERS). Report setup problems and bugs through [GitHub Issues](https://github.com/CManson38/silo-plugin-sonarr-prefetch/issues), including your Silo version, plugin version, and sanitized status output. Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
 
 ## References and license
 

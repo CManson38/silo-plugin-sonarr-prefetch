@@ -38,6 +38,7 @@ def main():
                        cwd=ROOT, env=target_env, check=True)
         manifest = dict(source_manifest, checksum=hashlib.sha256(binary.read_bytes()).hexdigest())
         (target / "manifest.json").write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
+        (output / f"manifest-{target_os}-{arch}.json").write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
         raw_binary = output / f"plugin-{target_os}-{arch}"
         shutil.copyfile(binary, raw_binary)
         raw_binary.chmod(0o755)

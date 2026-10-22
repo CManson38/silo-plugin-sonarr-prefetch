@@ -1,6 +1,6 @@
 {
   "plugin_id": "community.requests.prefetch",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "checksum": "__CHECKSUM__",
   "silo_api_version": "v1",
   "supported_platforms": [
@@ -90,7 +90,7 @@
           {
             "key": "episodes_ahead",
             "label": "Episodes ahead",
-            "description": "Next N episodes after the playing episode, including episodes already downloaded. Continues into the next season; skips specials.",
+            "description": "Next N episodes after the playing episode, including episodes with files already present in Sonarr. Continues into the next season; skips specials.",
             "control": "ADMIN_FORM_CONTROL_NUMBER",
             "default_value": 2,
             "validation": {
@@ -205,9 +205,9 @@
   "category": "Requests",
   "presentation": {
     "display_name": "Prefetch",
-    "summary": "Download upcoming TV episodes through Sonarr when someone starts watching in Silo.",
-    "description_markdown": "Receives Silo session-change events, reads current episodes from the Silo admin API, and monitors missing episodes in the next configured window. Searches aired episodes through one or two Sonarr instances. Supports account/profile inclusion and exclusion, and Sonarr tag filters. Series must already exist in Sonarr. Discovers its own Silo server automatically and sends requests only to that server and your configured Sonarr endpoints; no telemetry.",
-    "setup_markdown": "1. Enter a Silo API key owned by an administrator with scopes left empty (unrestricted). Silo has no restricted scope for the required sessions endpoint; its URL is discovered automatically.\n2. Enter the standard Sonarr URL and API key; optionally add 4K Sonarr.\n3. Choose episodes ahead and user/tag filters. Save.\n4. Open Prefetch status and test connections.\n5. Enable prefetch, save, and play a TV episode. Review status and Sonarr Activity.",
+    "summary": "Request Sonarr searches for upcoming TV episodes as you watch in Silo.",
+    "description_markdown": "Receives Silo session-change events and reads active episodes through Silo's v2 admin sessions API. By default, waits until playback reaches 10% before monitoring missing episodes in the next configured window and requesting searches for those that have aired. The threshold is configurable; 0 starts immediately. Checks one or two Sonarr instances wherever the series exists. Supports account/profile inclusion and exclusion, and Sonarr tag filters. Series must already exist in Sonarr. Queued episodes and recent searches are skipped. Sonarr handles release selection and its configured download clients. Discovers its own Silo server automatically and sends requests only to that server and your configured Sonarr endpoints; no telemetry. API keys travel in headers; redirects are refused. Status and connection checks require a Silo administrator.",
+    "setup_markdown": "1. Enter a Silo API key owned by an administrator with scopes left empty (unrestricted). Silo has no restricted scope for the required sessions endpoint; its URL is discovered automatically.\n2. Enter the standard Sonarr URL and API key; optionally add 4K Sonarr.\n3. Choose episodes ahead, minimum playback progress (default 10%), and user/tag filters. Save.\n4. Open Prefetch status and test connections.\n5. Enable prefetch, save, and play a TV episode until it reaches the configured progress threshold. Review status and Sonarr Activity.",
     "homepage_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch",
     "source_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch",
     "support_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/issues",

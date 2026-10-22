@@ -184,7 +184,7 @@ var page = template.Must(template.New("status").Parse(`<!doctype html>
 {{if .MinWatchedPercent}}<p>Prefetch waits until playback reaches {{.MinWatchedPercent}}% of the episode.</p>{{end}}
 {{if .ConfigError}}<p class="error">{{.ConfigError}}</p>{{end}}
 <p><a href="check">Test connections</a> · <a href="status">Refresh status</a></p>
-{{if .Checks}}<h2>Connection checks</h2><table><tr><th>Service</th><th>Result</th></tr>{{range .Checks}}<tr><td>{{.Service}}</td><td {{if not .OK}}class="error"{{end}}>{{.Message}}</td></tr>{{end}}</table><p>These checks only read Silo and Sonarr; they do not request downloads.</p>{{end}}
+{{if .Checks}}<h2>Connection checks</h2><table><tr><th>Service</th><th>Result</th></tr>{{range .Checks}}<tr><td>{{.Service}}</td><td {{if not .OK}}class="error"{{end}}>{{.Message}}</td></tr>{{end}}</table><p>These checks only read Silo and Sonarr; they do not change monitoring or request searches.</p>{{end}}
 <p>Last session event: {{if .LastEvent}}{{.LastEvent}} (UTC){{else}}Waiting for playback{{end}}</p>
 {{if .LastError}}<p class="error">{{.LastError}}</p>{{end}}
 {{if .Results}}<h2>Recent results</h2><table><tr><th>Instance</th><th>Series</th><th>Result</th></tr>{{range .Results}}<tr><td>{{.Instance}}</td><td>{{.Series}}</td><td>{{.Reason}}{{if .Searched}} (episode IDs: {{.Searched}}){{end}}</td></tr>{{end}}</table>{{end}}
