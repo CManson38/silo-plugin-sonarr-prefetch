@@ -44,7 +44,9 @@ The project is MIT licensed. I maintain it as `@CManson38`; CODEOWNERS, a suppor
 
 ### Test evidence and limits
 
-[TESTING.md](../TESTING.md) records earlier live Linux amd64 checks against Silo build `44b7930e` and Sonarr `4.0.20.3014`, including an installed plugin receiving a real session event and requesting monitoring/searches for The Simpsons S02E07–E08. A separate five-episode processor check also exercised the real Sonarr APIs.
+[TESTING.md](https://github.com/CManson38/silo-plugin-sonarr-prefetch/blob/main/TESTING.md) records earlier live Linux amd64 checks against Silo build `44b7930e` and Sonarr `4.0.20.3014`, including an installed plugin receiving a real session event and requesting monitoring/searches for The Simpsons S02E07–E08. A separate five-episode processor check also exercised the real Sonarr APIs.
+
+[The v0.2.1 release workflow](https://github.com/CManson38/silo-plugin-sonarr-prefetch/actions/runs/39744652700) passed, including race tests, platform builds, metadata checks, publication, and the standalone catalog update. All twelve published assets were downloaded and their digests and package contents verified. The token-absent notification path passed; the token-present dispatch has not been exercised against the community catalog.
 
 The configurable playback threshold is covered by automated tests, including stopping below it and crossing it on a later event. It has not been live-tested on the operator's server. Version 0.2.1 has not been installed there. ARM and macOS builds are cross-compiled; runtime execution on those platforms and completed imports have not been verified. A community reviewer should exercise connection, setup, and threshold-triggered searches using the published release.
 
