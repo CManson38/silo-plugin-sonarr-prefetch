@@ -3,7 +3,7 @@
     {
       "manifest": {
         "plugin_id": "community.requests.prefetch",
-        "version": "0.2.0",
+        "version": "0.2.1",
         "silo_api_version": "v1",
         "supported_platforms": [
           {
@@ -92,7 +92,7 @@
                 {
                   "key": "episodes_ahead",
                   "label": "Episodes ahead",
-                  "description": "Next N episodes after the playing episode, including episodes already downloaded. Continues into the next season; skips specials.",
+                  "description": "Next N episodes after the playing episode, including episodes with files already present in Sonarr. Continues into the next season; skips specials.",
                   "control": 4,
                   "default_value": 2,
                   "validation": {
@@ -206,9 +206,9 @@
         "category": "Requests",
         "presentation": {
           "display_name": "Prefetch",
-          "summary": "Download upcoming TV episodes through Sonarr when someone starts watching in Silo.",
-          "description_markdown": "Receives Silo session-change events, reads current episodes from the Silo admin API, and monitors missing episodes in the next configured window. Searches aired episodes through one or two Sonarr instances. Supports account/profile inclusion and exclusion, and Sonarr tag filters. Series must already exist in Sonarr. Discovers its own Silo server automatically and sends requests only to that server and your configured Sonarr endpoints; no telemetry.",
-          "setup_markdown": "1. Enter a Silo API key owned by an administrator with scopes left empty (unrestricted). Silo has no restricted scope for the required sessions endpoint; its URL is discovered automatically.\n2. Enter the standard Sonarr URL and API key; optionally add 4K Sonarr.\n3. Choose episodes ahead and user/tag filters. Save.\n4. Open Prefetch status and test connections.\n5. Enable prefetch, save, and play a TV episode. Review status and Sonarr Activity.",
+          "summary": "Request Sonarr searches for upcoming TV episodes as you watch in Silo.",
+          "description_markdown": "Receives Silo session-change events and reads active episodes through Silo's v2 admin sessions API. By default, waits until playback reaches 10% before monitoring missing episodes in the next configured window and requesting searches for those that have aired. The threshold is configurable; 0 starts immediately. Checks one or two Sonarr instances wherever the series exists. Supports account/profile inclusion and exclusion, and Sonarr tag filters. Series must already exist in Sonarr. Queued episodes and recent searches are skipped. Sonarr handles release selection and its configured download clients. Discovers its own Silo server automatically and sends requests only to that server and your configured Sonarr endpoints; no telemetry. API keys travel in headers; redirects are refused. Status and connection checks require a Silo administrator.",
+          "setup_markdown": "1. Enter a Silo API key owned by an administrator with scopes left empty (unrestricted). Silo has no restricted scope for the required sessions endpoint; its URL is discovered automatically.\n2. Enter the standard Sonarr URL and API key; optionally add 4K Sonarr.\n3. Choose episodes ahead, minimum playback progress (default 10%), and user/tag filters. Save.\n4. Open Prefetch status and test connections.\n5. Enable prefetch, save, and play a TV episode until it reaches the configured progress threshold. Review status and Sonarr Activity.",
           "homepage_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch",
           "source_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch",
           "support_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/issues",
@@ -219,19 +219,19 @@
         }
       },
       "repo_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch",
-      "checksums_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.0/checksums.txt",
+      "checksums_url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.1/checksums.txt",
       "binaries": {
         "darwin/arm64": {
-          "url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.0/plugin-darwin-arm64",
-          "checksum": "f4ea78c7e2eff69fee36e3e988a4c3d3aa22d4efe42a50e800da4aaa6f4fa423"
+          "url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.1/plugin-darwin-arm64",
+          "checksum": "4a0bc94b9d40c3539cf935697bff4c54b56b5d15652e1509f8a97cf78d8ed688"
         },
         "linux/amd64": {
-          "url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.0/plugin-linux-amd64",
-          "checksum": "3d6d9478a5b24cc3c546ae48bf637d8bc424adf0dcc7d7e1e9e0e0b8dadf8422"
+          "url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.1/plugin-linux-amd64",
+          "checksum": "e226399a7d34517900f114ef19c7e4d879b9f0af141a17504f7a714215c87682"
         },
         "linux/arm64": {
-          "url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.0/plugin-linux-arm64",
-          "checksum": "f0ab756a88652333b1261aa6586584da028ff0c35801bad5673814ba695cf9f7"
+          "url": "https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases/download/v0.2.1/plugin-linux-arm64",
+          "checksum": "483318e35e41d8e93eed4c49634b80003320fc123212869d8d8ed2f2f052fc1e"
         }
       }
     }
