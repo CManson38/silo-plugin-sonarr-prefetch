@@ -1,4 +1,4 @@
-Prefetch downloads upcoming TV episodes through Sonarr when playback progresses in Silo.
+Prefetch monitors upcoming missing TV episodes and requests searches through Sonarr when playback progresses in Silo.
 
 - Prefetch starts at **10% playback progress** by default. Configure another percentage, or set 0 for immediate prefetch. Resuming or seeking past the threshold qualifies.
 - Configure standard and optional 4K Sonarr instances, episodes ahead, user/profile filters, and Sonarr tag filters.

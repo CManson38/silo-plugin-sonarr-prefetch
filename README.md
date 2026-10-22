@@ -1,8 +1,8 @@
 # Prefetch for Silo
 
-Automatically download upcoming TV episodes through Sonarr as you watch in Silo. Prefetch waits until an episode reaches 10% playback progress by default, then asks Sonarr to fetch missing episodes ahead of it.
+Automatically request searches for upcoming TV episodes through Sonarr as you watch in Silo. By default, Prefetch waits until an episode reaches 10% playback progress before monitoring upcoming missing episodes and requesting searches for those that have aired.
 
-You can configure how many episodes to fetch, when prefetching starts, which users and series qualify, and an optional second Sonarr instance for 4K content.
+You can configure how many upcoming episodes to check, when searches are requested, which users and series qualify, and an optional second Sonarr instance for 4K content.
 
 ## Install
 
@@ -36,7 +36,7 @@ Upload the ZIP directly; you do not need to extract it. Archive checksums are in
 | Silo admin API key | Create an API key owned by an **administrator** and leave its **scopes empty (unrestricted)**. Prefetch reads `GET /api/v2/admin/sessions`; Silo currently has no restricted scope granting that endpoint. `admin:sessions:summary:read` is insufficient. |
 | Sonarr URL / API key | Base URL, usually `http://sonarr:8989`, and **Settings → General → Security → API Key**. Reverse proxy base paths are supported. |
 | 4K Sonarr URL / API key | Optional second instance. Supply both or leave both empty. Both instances prefetch wherever the series exists, regardless of the playing file's resolution. |
-| Episodes ahead | 1–100; default 2. Counts the next N episodes, including those already downloaded. |
+| Episodes ahead | 1–100; default 2. Counts the next N episodes, including those already available in Sonarr. |
 | Minimum playback progress (%) | 0–100; default 10. Wait until the playing episode reaches 10% before monitoring or searching upcoming episodes. Set 0 for immediate prefetch. |
 | Include users / profiles | Empty allows everyone. Otherwise, an account ID, username, profile ID, or profile name must match. |
 | Exclude users / profiles | Any matching account/profile ID or name skips that session. Exclusion wins over inclusion. |
@@ -65,7 +65,7 @@ For each eligible session and each Sonarr instance:
 
 With **episodes ahead = 3**, playing S01E07 checks S01E08, S02E01, and S02E02 when those are the next known episodes. If S01E08 is present, only the other two need monitoring. Unaired episodes are monitored for Sonarr's RSS handling but are not searched early; episodes with no known air date are also not searched.
 
-Movies, specials, paused sessions, and incomplete episode metadata are ignored. Prefetch never adds a new series or requests a whole-season search. It monitors known episodes within the window, without enabling automatic monitoring of unannounced seasons. Sonarr selects releases and sends downloads to its configured clients; a submitted search does not guarantee that a matching release exists or finishes downloading in time.
+Movies, specials, paused sessions, and incomplete episode metadata are ignored. Prefetch never adds a new series or requests a whole-season search. It monitors known episodes within the window, without enabling automatic monitoring of unannounced seasons. Sonarr handles release selection and any resulting downloads through its configured clients; a search request does not guarantee a matching release or a completed import before the next episode.
 
 Successful session/instance work and recent searches are remembered for 15 minutes in process memory. Concurrent notifications are serialized. A failing Sonarr does not prevent the other from processing. Retries skip successful instance work. Hosts with durable plugin event delivery retry failed calls. After a restart or across multiple Silo API replicas, memory is independent: queue checks still apply, but searches can repeat before downloads appear in Sonarr's queue.
 
@@ -76,9 +76,9 @@ Only the discovered local Silo API and configured Sonarr endpoints receive reque
 1. Save your settings and use **Prefetch status → Test connections**.
 2. Enable prefetch. Choose a series that exists in Sonarr and has an aired missing episode within your configured window.
 3. Play an episode in Silo using an allowed profile and reach the configured progress threshold.
-4. Open **Prefetch status** to see the result. In Sonarr, the selected missing episodes should be monitored, and matching releases should appear in **Activity → Queue**.
+4. Open **Prefetch status** to see the result. In Sonarr, the selected missing episodes should be monitored, with searches requested for eligible aired episodes. Any matching releases accepted by Sonarr appear in **Activity → Queue**.
 
-Connection checks only read services; they do not request downloads. See [TESTING.md](TESTING.md) for automated and live verification details.
+Connection checks only read services; they do not change monitoring or request searches. See [TESTING.md](TESTING.md) for automated and live verification details.
 
 If status stays **Waiting for playback**, confirm your Silo build supports plugin event consumers and publishes these session events. A 401/403 means the API key/account permissions need checking; use an administrator-owned key with empty scopes. A discovery failure means the host broker or internal URL information is unavailable. A Silo 404 can indicate a build predating the native v2 endpoint. **Series not found** requires aligning Silo's title with a Sonarr title/alternate title.
 

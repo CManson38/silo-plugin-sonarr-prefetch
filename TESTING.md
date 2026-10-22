@@ -21,7 +21,7 @@ The initial `go test -cover ./...` passed using Go 1.27.3 on Windows amd64, with
 | Event-driven prefetch | Send session-change notifications through the compiled plugin to HTTP fixtures and verify exactly one search for a repeated session. |
 | Playback progress | Verify early-stop suppression, threshold crossing on later events, boundary values, unavailable duration, and no monitoring/search before eligibility. |
 | Two Sonarr instances | Process both; fail the second search; retry without repeating the first instance's successful work. |
-| Episode window | Continue across seasons; downloaded episodes still count toward N; exclude specials and the currently playing episode. |
+| Episode window | Continue across seasons; episodes already available in Sonarr still count toward N; exclude specials and the currently playing episode. |
 | Monitoring and search | Monitor only missing episodes, preserve other series/season settings, and search only known aired episodes. |
 | User/profile filters | Include by account ID/name or profile ID/name; exclusions override inclusions. |
 | Tag filters | Resolve labels per Sonarr; include/exclude precedence; no mutation when tag lookup fails. |
@@ -44,7 +44,7 @@ Observed results:
 - Standard Sonarr contained S02E01 on disk; S02E02–E06 were missing and unmonitored before the test.
 - Episode IDs 97056–97060 became monitored. S02E07 stayed unmonitored, confirming the window boundary.
 - Sonarr accepted `EpisodeSearch` command 132840860 and completed it.
-- After the search, four of the selected episodes appeared in the download queue with healthy tracking status: one downloading and three queued. This verifies download submission, not completed imports for every requested episode.
+- After the search, four of the selected episodes appeared in Sonarr's queue with healthy tracking status: one downloading and three queued. This verifies that Sonarr acted on the search request; completed imports were not checked for every requested episode.
 - Repeating the same session through the processor produced no second search.
 - The 4K instance did not contain The Simpsons and correctly skipped it.
 
