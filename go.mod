@@ -1,4 +1,4 @@
-module github.com/CManson38/silo-plugin-requests-prefetch
+module github.com/CManson38/silo-plugin-sonarr-prefetch
 
 go 1.26.0
 

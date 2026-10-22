@@ -4,7 +4,7 @@ Download upcoming TV episodes through Sonarr when someone starts watching in Sil
 
 ## Install
 
-1. Download the appropriate ZIP from [GitHub Releases](https://github.com/CManson38/silo-plugin-requests-prefetch/releases), or build the packages below.
+1. Download the appropriate ZIP from [GitHub Releases](https://github.com/CManson38/silo-plugin-sonarr-prefetch/releases), or build the packages below.
 2. In Silo, open **Administration → Plugins → Install from a file**. Upload the archive for the machine running **Silo**, not your browser:
    - `prefetch-0.2.0-linux-amd64.zip`: typical Unraid / x86 Docker server.
    - `prefetch-0.2.0-linux-arm64.zip`: ARM Linux server.

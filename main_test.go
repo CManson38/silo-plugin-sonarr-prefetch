@@ -60,7 +60,7 @@ func TestBuiltPluginHandshakeAndPlaybackEvent(t *testing.T) {
 	if err = manifestsdk.Validate(&manifest); err != nil {
 		t.Fatal(err)
 	}
-	if err = manifestsdk.ValidateCatalogPresentation(&manifest, "https://github.com/CManson38/silo-plugin-requests-prefetch"); err != nil {
+	if err = manifestsdk.ValidateCatalogPresentation(&manifest, "https://github.com/CManson38/silo-plugin-sonarr-prefetch"); err != nil {
 		t.Fatal(err)
 	}
 	data, _ := os.ReadFile(binary)

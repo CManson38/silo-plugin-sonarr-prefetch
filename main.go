@@ -3,7 +3,7 @@ package main
 import (
 	_ "embed"
 
-	"github.com/CManson38/silo-plugin-requests-prefetch/prefetch"
+	"github.com/CManson38/silo-plugin-sonarr-prefetch/prefetch"
 	"github.com/Silo-Server/silo-plugin-sdk/pkg/pluginsdk/runtime"
 )
 
